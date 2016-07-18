@@ -6,14 +6,21 @@ if (!process.env.token) {
 
 var acronyms = {};
 
+var listening = new Set();
+
 const Botkit = require('botkit');
 const controller = Botkit.slackbot({ json_file_store: 'acrobot_db' });
-controller.spawn({ token: process.env.token }).startRTM((error, bot, response) => loadData(bot.team_info.id));
+controller.spawn({ token: process.env.token }).startRTM((error, bot, response) => loadData(bot));
 
-function loadData(teamId) {
-    controller.storage.teams.get(teamId, (err, data) => {
+function loadData(bot) {
+    controller.storage.teams.get(bot.team_info.id, (err, data) => {
         if (data !== undefined && data.acronyms !== undefined)
             acronyms = data.acronyms;
+    });
+
+    controller.storage.channels.all((error, channels) => {
+        for (var channel of channels)
+            if (channel.listen) listening.add(channel.id);
     });
 }
 
@@ -23,7 +30,7 @@ function normaliseAcronym(acronym) {
         .toUpperCase()
 }
 
-const directly = ['direct_message', 'mention', 'direct_mention']
+const directly = ['direct_message', 'mention', 'direct_mention'];
 
 controller.hears('ping', directly, (bot, message) => bot.reply(message, 'pong'));
 
@@ -59,5 +66,34 @@ controller.hears([
     } else {
         console.log(`Acronym '${acronym}' not found.`);
         bot.reply(message, 'Well, this is a bit embarrassing... I\'m afraid I don\'t know that one, but you can teach me!');
+    }
+});
+
+controller.hears([/(start|stop|are you) listening/], ['mention', 'direct_mention'], (bot, message) => {
+
+    const request = message.match[1].toLowerCase();
+    const channel = message.channel;
+
+    if (request == 'start') {
+        console.log(`Start listening on channel ID: ${channel}`);
+        listening.add(channel);
+        controller.storage.channels.save({ id: channel, listen: true });
+    } else if (request == 'stop') {
+        console.log(`Stop listening on channel ID: ${channel}`);
+        listening.delete(channel);
+        controller.storage.channels.save({id: channel, listen: false});
+    } else if (request == 'are you') {
+        bot.reply(message, listening.has(message.channel) ?
+            'Yep, I\'m listening.' : 'No, I\'m not listening.');
+    } else {
+        console.log(`Unknown action '${request}'`);
+        bot.reply(message, 'Sorry, I don\'t understand what you mean.');
+    }
+});
+
+controller.on('ambient', (bot, message) => {
+
+    if (listening.has(message.channel)) {
+        // detect acronyms, etc.
     }
 });
