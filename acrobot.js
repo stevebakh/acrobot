@@ -28,7 +28,7 @@ const directly = ['direct_message', 'mention', 'direct_mention']
 controller.hears('ping', directly, (bot, message) => bot.reply(message, 'pong'));
 
 controller.hears([
-    /(?:define\s|remember\s)?(?:"|')?([\w\.]+)(?:"|')? (?:as|for|means|stands for) (?:"|')?(.+?)(?:"|')?$/
+    /(?:define\s|remember\s)?(?:\W)?([\w\.]+)(?:\W)? (?:as|for|means|stands for) (?:\W)?(.+?)(?:\W)?$/
 ], directly, (bot, message) => {
 
     const acronym = normaliseAcronym(message.match[1]);
@@ -41,14 +41,14 @@ controller.hears([
         console.log(`User saved acronym: '${acronym}' for '${expansion}'`);
         acronyms[acronym] = expansion;
         controller.storage.teams.save({ id: message.team, acronyms });
-        bot.reply(message, `Oooh, a new acronym! Thanks!`);
+        bot.reply(message, 'Oooh, a new acronym! Thanks!');
     }
 });
 
 controller.hears([
-    /what(?:[^\w]|\si)s the meaning of ([\w\.]{2,})\b/,
-    /what(?:[^\w]|\si)s ([\w\.]{2,})\b/,
-    /what does (.{2,}) (?:mean|stand for)\b/
+    /what(?:[^\w]|\si)s the meaning of ([\w\.]+)\b/,
+    /what(?:[^\w]|\si)s ([\w\.]+)\b/,
+    /what does (.+) (?:mean|stand for)\b/
 ], directly, (bot, message) => {
 
     const acronym = normaliseAcronym(message.match[1]);
