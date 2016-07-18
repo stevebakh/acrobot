@@ -1,0 +1,15 @@
+{
+  "name": "acrobot",
+  "version": "0.0.1",
+  "description": "A Slack bot to expand acronyms",
+  "author": "Steven Bakhtiari <steven@substrate.co.uk>",
+  "license": "MIT",
+  "main": "acrobot.js",
+  "dependencies": {
+    "botkit": "latest"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
