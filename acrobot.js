@@ -44,7 +44,7 @@ const directly = ['direct_message', 'mention', 'direct_mention'];
 controller.hears('ping', directly, (bot, message) => bot.reply(message, 'pong'));
 
 controller.hears([
-    /(?:\W)?([A-Za-z0-9\.]+)(?:\W)? (?:is|means|stands for) (?:\W)?(.+?)(?:\W)?$/
+    /(?:\W)?([A-Za-z0-9\.]+)(?:\W)? (?:means|stands for) (?:\W)?(.+?)(?:\W)?$/
 ], directly, (bot, message) => {
 
     const acronym = normaliseAcronym(message.match[1]);
