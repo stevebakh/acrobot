@@ -94,6 +94,14 @@ controller.hears([/(start|stop|are you) listening/], ['mention', 'direct_mention
 controller.on('ambient', (bot, message) => {
 
     if (listening.has(message.channel)) {
-        // detect acronyms, etc.
+        const tokenised = message.text.replace(/['",\.;:\?\(\)]/g, '').split(/\s/);
+        const matched = tokenised.filter(part => part.match(/^[A-Z]{2,}$/) && acronyms.hasOwnProperty(part));
+
+        if (matched.length > 0) {
+            const maybePlural = matched.length > 1 ? 's' : '';
+            var response = `Acronym${maybePlural} detected!`;
+            matched.forEach(acronym => response += `\n'${acronym}' means '${acronyms[acronym]}.'`);
+            bot.reply(message, response);
+        }
     }
 });
