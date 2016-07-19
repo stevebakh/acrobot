@@ -8,6 +8,15 @@ var acronyms = {};
 
 var listening = new Set();
 
+var stopWords = [
+    "AND",
+    "THE",
+    "IT",
+    "AS",
+    "AN"
+];
+
+const entities = require('entities');
 const Botkit = require('botkit');
 const controller = Botkit.slackbot({ json_file_store: 'acrobot_db' });
 controller.spawn({ token: process.env.token }).startRTM((error, bot, response) => loadData(bot));
@@ -35,11 +44,11 @@ const directly = ['direct_message', 'mention', 'direct_mention'];
 controller.hears('ping', directly, (bot, message) => bot.reply(message, 'pong'));
 
 controller.hears([
-    /(?:define\s|remember\s)?(?:\W)?([\w\.]+)(?:\W)? (?:as|for|means|stands for) (?:\W)?(.+?)(?:\W)?$/
+    /(?:\W)?([A-Za-z0-9\.]+)(?:\W)? (?:is|means|stands for) (?:\W)?(.+?)(?:\W)?$/
 ], directly, (bot, message) => {
 
     const acronym = normaliseAcronym(message.match[1]);
-    const expansion = message.match[2];
+    const expansion = entities.decodeHTML(message.match[2]);
 
     if (acronyms.hasOwnProperty(acronym)) {
         console.log(`Acronym '${acronym}' already defined!`);
@@ -95,7 +104,10 @@ controller.on('ambient', (bot, message) => {
 
     if (listening.has(message.channel)) {
         const tokenised = message.text.replace(/['",\.;:\?\(\)]/g, '').split(/\s/);
-        const matched = tokenised.filter(part => part.match(/^[A-Z]{2,}$/) && acronyms.hasOwnProperty(part));
+        const matched = tokenised.filter(part =>
+            part.match(/^[A-Z]{2,}$/) &&
+            acronyms.hasOwnProperty(part) &&
+            !stopWords.includes(part));
 
         if (matched.length > 0) {
             const maybePlural = matched.length > 1 ? 's' : '';

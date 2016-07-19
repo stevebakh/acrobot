@@ -6,7 +6,8 @@
   "license": "MIT",
   "main": "acrobot.js",
   "dependencies": {
-    "botkit": "latest"
+    "botkit": "latest",
+    "entities": "latest"
   },
   "devDependencies": {},
   "scripts": {
