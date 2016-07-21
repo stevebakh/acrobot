@@ -1,9 +1,4 @@
 
-if (!process.env.token) {
-    console.log('Error: Specify token in environment');
-    process.exit(1);
-}
-
 var acronyms = {};
 
 var listening = new Set();
@@ -16,10 +11,9 @@ var stopWords = [
     "AN"
 ];
 
+const config = { json_file_store: 'acrobot_db' };
+const controller = require('./custom_integration').init(process.env.token, config, loadData);
 const entities = require('entities');
-const Botkit = require('botkit');
-const controller = Botkit.slackbot({ json_file_store: 'acrobot_db' });
-controller.spawn({ token: process.env.token }).startRTM((error, bot, response) => loadData(bot));
 
 function loadData(bot) {
     controller.storage.teams.get(bot.team_info.id, (err, data) => {
