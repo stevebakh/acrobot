@@ -62,6 +62,40 @@ controller.hears([
 });
 
 controller.hears([
+    /(?:remove|delete) (?:\W)?(.+?)(?:\W)?$/
+], directly, (bot, message) => {
+
+    const acronym = normaliseAcronym(message.match[1]);
+    console.log(`User requested deletion of acronym: '${acronym}'`);
+
+    if (acronyms.hasOwnProperty(acronym)) {
+        delete acronyms[acronym];
+        bot.reply(message, `Ok, I won't explain '${acronym}' from now on.`);
+    } else {
+        console.log(`Unable to delete '${acronym}'. Acronym not found.`);
+        bot.reply(message, 'Sorry, I don\'t know that acronym.');
+    }
+});
+
+controller.hears([
+    /update (?:\W)?([A-Za-z0-9\.]+)(?:\W)? (?:to|with) (?:\W)?(.+?)(?:\W)?$/,
+    /replace (?:\W)?([A-Za-z0-9\.]+)(?:\W)? with (?:\W)?(.+?)(?:\W)?$/
+], directly, (bot, message) => {
+
+    const acronym = normaliseAcronym(message.match[1]);
+    const expansion = entities.decodeHTML(message.match[2]);
+
+    if (acronyms.hasOwnProperty(acronym)) {
+        acronyms[acronym] = expansion;
+    } else {
+        console.log(`No existing acronym to update. Creating new acronym '${acronym}'.`);
+    }
+
+    controller.storage.teams.save({ id: message.team, acronyms });
+    bot.reply(message, 'Thanks for the update!');
+});
+
+controller.hears([
     /what(?:[^\w]|\si)s the meaning of ([\w\.]+)\b/,
     /what(?:[^\w]|\si)s ([\w\.]+)\b/,
     /what does (.+) (?:mean|stand for)\b/
@@ -112,7 +146,7 @@ controller.on('ambient', (bot, message) => {
         if (matched.length > 0) {
             const maybePlural = matched.length > 1 ? 's' : '';
             var response = `Acronym${maybePlural} detected!`;
-            matched.forEach(acronym => response += `\n'${acronym}' means '${acronyms[acronym]}.'`);
+            matched.forEach(acronym => response += `\n'${acronym}' means '${acronyms[acronym]}'.`);
             bot.reply(message, response);
         }
     }
