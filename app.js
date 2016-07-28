@@ -34,7 +34,7 @@ module.exports = {
                     bot.startRTM((error, bot, response) => {
                         handleError(error);
                         activeBots[bot.config.token] = bot;
-                        callback(bot);
+                        if (callback) callback(bot);
                     });
                 }
             });
@@ -46,7 +46,7 @@ module.exports = {
                         controller.spawn(team).startRTM((error, bot, response) => {
                             handleError(error);
                             activeBots[bot.config.token] = bot;
-                            callback(bot);
+                            if (callback) callback(bot);
                         });
                     }
                 }
