@@ -5,7 +5,7 @@ module.exports = {
     init: (token, config, callback) => {
         const controller = Botkit.slackbot(config);
 
-        controller.spawn({ token: process.env.token }).startRTM((error, bot, response) => {
+        controller.spawn({ token: token }).startRTM((error, bot, response) => {
             if (error) {
                 console.error(error);
                 process.exit(1);
