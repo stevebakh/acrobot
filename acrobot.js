@@ -164,9 +164,8 @@ controller.on('ambient', (bot, message) => {
             controller.storage.users.get(message.user, (error, data) => {
                 if (error) {
                     const maybePlural = matched.length > 1 ? 's' : '';
-                    var response = `Acronym${maybePlural} detected!`;
-                    matched.forEach(acronym => response += `\n'${acronym}' means '${acronyms[teamId][acronym]}'.`);
-                    bot.reply(message, response);
+                    bot.reply(message, `Acronym${maybePlural} detected!` + matched.map(
+                        acronym => `\n'${acronym}' means '${acronyms[teamId][acronym]}'.`));
                 } else {
                     var response = message.text;
                     matched.forEach(acronym => {
